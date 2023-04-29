@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.vertexshader": "glsl",
+        "*.fragmentshader": "glsl",
+        "iostream": "cpp",
+        "xlocale": "cpp"
+    }
+}

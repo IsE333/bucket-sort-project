@@ -1,185 +1,125 @@
-
-// Bucket sort in C++
-
-//
-#include <iomanip>
 #include <iostream>
+
+#define ARRAY_SIZE 17  // size of array to be sorted
+#define BUCKET_COUNT 6 // number of buckets to be used
+#define INTERVAL 10    // interval of values in each bucket
+
 using namespace std;
 
-#define NARRAY 12   // Array size
-#define NBUCKET 6   // Number of buckets
-#define INTERVAL 10 // Each bucket capacity
-
-struct Node
+class Node // node for linked list (bucket)
 {
-    int data;
-    struct Node *next;
+public:
+    int value;  // value of node
+    Node *next; // pointer to next node
 };
 
-void BucketSort(int arr[]);
-struct Node *InsertionSort(struct Node *list);
-void print(int arr[]);
-void printBuckets(struct Node *list);
-int getBucketIndex(int value);
-
-// Sorting function
-void BucketSort(int arr[])
+void print(int array[]) // print array of integers
 {
-    int i, j;
-    struct Node **buckets;
-
-    // Create buckets and allocate memory size
-    buckets = (struct Node **)malloc(sizeof(struct Node *) * NBUCKET);
-
-    // Initialize empty buckets
-    for (i = 0; i < NBUCKET; ++i)
+    for (int i = 0; i < ARRAY_SIZE; ++i) // for each item in array
     {
-        buckets[i] = NULL;
+        cout << array[i] << " "; // print item
     }
+    cout << endl; // print new line
+}
 
-    // Fill the buckets with respective elements
-    for (i = 0; i < NARRAY; ++i)
+void print(Node *node) // print linked list (bucket)
+{
+    while (node != NULL) // while not end of list
     {
-        struct Node *current;
-        int pos = getBucketIndex(arr[i]);
-        current = (struct Node *)malloc(sizeof(struct Node));
-        current->data = arr[i];
-        current->next = buckets[pos];
-        buckets[pos] = current;
+        cout << node->value << " "; // print value of current node
+        node = node->next;          // move to next node
     }
+    cout << endl; // print new line
+}
 
-    // Print the buckets along with their elements
-    for (i = 0; i < NBUCKET; i++)
+void printAllBuckets(Node *buckets[]) // print all buckets
+{
+    for (int i = 0; i < BUCKET_COUNT; ++i) // for each bucket
     {
-        cout << "Bucket[" << i << "] : ";
-        printBuckets(buckets[i]);
-        cout << endl;
+        cout << "Bucket " << i << ": "; // print bucket index
+        print(buckets[i]);              // print bucket
     }
+}
 
-    // Sort the elements of each bucket
-    for (i = 0; i < NBUCKET; ++i)
+void setArrayFromBuckets(int array[], Node *buckets[]) // for adding sorted items from buckets to the array
+{
+    int index = 0;                         // set index to 0
+    for (int i = 0; i < BUCKET_COUNT; ++i) // for each bucket
     {
-        buckets[i] = InsertionSort(buckets[i]);
-    }
-
-    cout << "-------------" << endl;
-    cout << "Bucktets after sorted" << endl;
-    for (i = 0; i < NBUCKET; i++)
-    {
-        cout << "Bucket[" << i << "] : ";
-        printBuckets(buckets[i]);
-        cout << endl;
-    }
-
-    // Put sorted elements on arr
-    for (j = 0, i = 0; i < NBUCKET; ++i)
-    {
-        struct Node *node;
-        node = buckets[i];
-        while (node)
+        Node *current = buckets[i]; // set current node to first node in bucket
+        while (current != NULL)     // while not end of bucket
         {
-            arr[j++] = node->data;
-            node = node->next;
+            array[index] = current->value; // set value of current node to array at index
+            current = current->next;       // move to next node in bucket
+            index++;                       // increment index
         }
     }
+}
 
-    for (i = 0; i < NBUCKET; ++i)
+Node *insertionSort(Node *node) // insertion sort for linked list (bucket)
+{
+    Node *current = node; // set current node to first node in list
+    Node *sorted = NULL;  // set sorted list to NULL
+
+    while (current != NULL) // while not end of list
     {
-        struct Node *node;
-        node = buckets[i];
-        while (node)
+        Node *next = current->next;                            // set next node to next node in list
+        if (sorted == NULL || sorted->value >= current->value) // if sorted list is empty or value of current node is less than value of first node in sorted list
         {
-            struct Node *tmp;
-            tmp = node;
-            node = node->next;
-            free(tmp);
+            current->next = sorted; // set next node of current node to sorted list
+            sorted = current;       // set current node as first node in sorted list
         }
+        else // if value of current node is greater than value of first node in sorted list
+        {
+            Node *temp = sorted;                                             // set temp node to first node in sorted list
+            while (temp->next != NULL && temp->next->value < current->value) // while not end of sorted list and value of next node in sorted list is less than value of current node
+            {
+                temp = temp->next; // move to next node in sorted list
+            }
+            current->next = temp->next; // set next node of current node to next node of temp node
+            temp->next = current;       // set next node of temp node to current node
+        }
+        current = next; // move to next node in list
     }
-    free(buckets);
+    return sorted; // return sorted list
+}
+
+void BucketSort(int array[])
+{
+    Node *buckets[BUCKET_COUNT];
+    for (int i = 0; i < BUCKET_COUNT; ++i) // initialize buckets
+    {
+        buckets[i] = NULL; // set each bucket to NULL
+    }
+
+    for (int i = 0; i < ARRAY_SIZE; ++i) // add items to buckets based on interval of their value
+    {
+        int bucketIndex = array[i] / INTERVAL; // get bucket index for current item from modulo of its value and interval
+        Node *current = new Node();            // create new node for current item
+        current->value = array[i];             // set value of current item to current node
+        current->next = buckets[bucketIndex];  // add current item to the beginning of the bucket
+        buckets[bucketIndex] = current;        // set current item as the first item in the bucket
+    }
+
+    cout << "Initial buckets: " << endl;
+    printAllBuckets(buckets); // print all buckets
+
+    for (int i = 0; i < BUCKET_COUNT; ++i) // sort each bucket
+    {
+        buckets[i] = insertionSort(buckets[i]);
+    }
+
+    cout << "-------------" << endl
+         << "Sorted buckets: " << endl;
+    printAllBuckets(buckets); // print all buckets
+
+    setArrayFromBuckets(array, buckets); // set array from buckets
     return;
 }
 
-// Function to sort the elements of each bucket
-struct Node *InsertionSort(struct Node *list)
-{
-    struct Node *k, *nodeList;
-    if (list == 0 || list->next == 0)
-    {
-        return list;
-    }
-
-    nodeList = list;
-    k = list->next;
-    nodeList->next = 0;
-    while (k != 0)
-    {
-        struct Node *ptr;
-        if (nodeList->data > k->data)
-        {
-            struct Node *tmp;
-            tmp = k;
-            k = k->next;
-            tmp->next = nodeList;
-            nodeList = tmp;
-            continue;
-        }
-
-        for (ptr = nodeList; ptr->next != 0; ptr = ptr->next)
-        {
-            if (ptr->next->data > k->data)
-                break;
-        }
-
-        if (ptr->next != 0)
-        {
-            struct Node *tmp;
-            tmp = k;
-            k = k->next;
-            tmp->next = ptr->next;
-            ptr->next = tmp;
-            continue;
-        }
-        else
-        {
-            ptr->next = k;
-            k = k->next;
-            ptr->next->next = 0;
-            continue;
-        }
-    }
-    return nodeList;
-}
-
-int getBucketIndex(int value)
-{
-    return value / INTERVAL;
-}
-
-// Print buckets
-void print(int ar[])
-{
-    int i;
-    for (i = 0; i < NARRAY; ++i)
-    {
-        cout << setw(3) << ar[i];
-    }
-    cout << endl;
-}
-
-void printBuckets(struct Node *list)
-{
-    struct Node *cur = list;
-    while (cur)
-    {
-        cout << setw(3) << cur->data;
-        cur = cur->next;
-    }
-}
-
-// Driver code
 int main(void)
 {
-    int array[NARRAY] = {13, 17, 29, 8, 11, 42, 32, 33, 52, 37, 47, 51};
+    int array[ARRAY_SIZE] = {13, 17, 29, 24, 22, 5, 11, 42, 8, 52, 37, 32, 35, 47, 49, 51, 56}; // initialize array
 
     cout << "Initial array: " << endl;
     print(array);
