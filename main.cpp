@@ -1,132 +1,91 @@
 #include <iostream>
-
-#define ARRAY_SIZE 17  // size of array to be sorted
-#define BUCKET_COUNT 6 // number of buckets to be used
-#define INTERVAL 10    // interval of values in each bucket
-
 using namespace std;
 
-class Node // node for linked list (bucket)
+void printArray(int arr[], int n)
 {
-public:
-    int value;
-    Node *next;
-};
-
-void print(int array[])
-{
-    for (int i = 0; i < ARRAY_SIZE; ++i) // for each item in array
+    cout << "Array : " << endl;
+    for (int i = 0; i < n; i++)
     {
-        cout << array[i] << " ";
+        cout << arr[i] << " ";
     }
     cout << endl;
 }
 
-void print(Node *node) // print linked list (bucket)
+int findMax(int arr[], int n)
 {
-    while (node != NULL)
+    int i, max = arr[0], digits = 0;
+    for (i = 1; i < n; i++) // finding max element from array
     {
-        cout << node->value << " "; // print value of current node
-        node = node->next;          // move to next node
+        if (arr[i] > max)
+            max = arr[i];
     }
-    cout << endl;
+    while (max > 0) // finding number of digits in max element
+    {
+        digits++;
+        max = max / 10;
+    }
+
+    return digits;
 }
 
-void printAllBuckets(Node *buckets[])
+void bucketSort(int arr[], int *bucket[], int numOfElements)
 {
-    for (int i = 0; i < BUCKET_COUNT; ++i)
-    {
-        cout << "Bucket " << i << ": "; // bucket index
-        print(buckets[i]);
-    }
-}
+    static int sizeOfBucket[10], bucketIndex, l, divisor = 1;
+    int digitCount;
+    digitCount = findMax(arr, numOfElements); // Determine the number of digits in the maximum element of the array
 
-void setArrayFromBuckets(int array[], Node *buckets[]) // for adding sorted items from buckets to the array
-{
-    int index = 0;
-    for (int i = 0; i < BUCKET_COUNT; ++i) // for each bucket
+    for (int m = 0; m < digitCount; m++) // Loop through the number of digits
     {
-        Node *current = buckets[i]; // set current node to first node in bucket
-        while (current != NULL)     // while not end of bucket
+        for (int i = 0; i < 10; i++)
+            sizeOfBucket[i] = 0;                // Initialize the size of each bucket to zero
+        for (int i = 0; i < numOfElements; i++) // Loop through each element of the array
         {
-            array[index] = current->value; // set value of current node to array at index
-            current = current->next;       // move to next node in bucket
-            index++;                       // increment index
+            bucketIndex = (arr[i] / divisor) % 10;                   // Find the digit to use as an index in the bucket array
+            bucket[bucketIndex][sizeOfBucket[bucketIndex]] = arr[i]; // Add the element to the corresponding bucket as last element
+            sizeOfBucket[bucketIndex]++;                             // Increment the number of elements in that bucket
         }
-    }
-}
 
-Node *insertionSort(Node *node) // insertion sort for linked list (bucket)
-{
-    Node *current = node; // set current node to first node in list
-    Node *sorted = NULL;  // set sorted list to NULL
+        cout << endl
+             << "Iteration " << m + 1 << " : ";
 
-    while (current != NULL) // while not end of list
-    {
-        Node *next = current->next;                            // set next node to next node in list
-        if (sorted == NULL || sorted->value >= current->value) // if sorted list is empty or value of current node is less than value of first node in sorted list
+        // Copy the elements from the bucket array back to the original array
+        l = 0;                       // Index counter for the original array
+        for (int i = 0; i < 10; i++) // Loop through the bucket array
         {
-            current->next = sorted; // set next node of current node to sorted list
-            sorted = current;       // set current node as first node in sorted list
-        }
-        else // if value of current node is greater than value of first node in sorted list
-        {
-            Node *temp = sorted;                                             // set temp node to first node in sorted list
-            while (temp->next != NULL && temp->next->value < current->value) // while not end of sorted list and value of next node in sorted list is less than value of current node
+            cout << endl
+                 << "Bucket " << i << " : ";
+
+            for (int k = 0; k < sizeOfBucket[i]; k++) // Loop through each element in the current bucket
             {
-                temp = temp->next; // move to next node in sorted list
+                cout << bucket[i][k] << " ";
+                arr[l] = bucket[i][k]; // Copy the element back to the original array
+                l++;
             }
-            current->next = temp->next; // set next node of current node to next node of temp node
-            temp->next = current;       // set next node of temp node to current node
         }
-        current = next; // move to next node in list
+        divisor *= 10; // Move to the next digit
+        cout << endl;
+
+        printArray(arr, numOfElements);
     }
-    return sorted; // return sorted list
 }
 
-void BucketSort(int array[])
+int main()
 {
-    Node *buckets[BUCKET_COUNT];
-    for (int i = 0; i < BUCKET_COUNT; ++i) // initialize buckets
-    {
-        buckets[i] = NULL; // set each bucket to NULL
-    }
+    int numOfElements, *arr, i;
+    int *bucket[10];
 
-    for (int i = 0; i < ARRAY_SIZE; ++i) // add items to buckets based on interval of their value
-    {
-        int bucketIndex = array[i] / INTERVAL; // get bucket index for current item from modulo of its value and interval
-        Node *current = new Node();            // create new node for current item
-        current->value = array[i];             // set value of current item to current node
-        current->next = buckets[bucketIndex];  // add current item to the beginning of the bucket
-        buckets[bucketIndex] = current;        // set current item as the first item in the bucket
-    }
+    cout << "Enter no of element : ";
+    cin >> numOfElements;
+    arr = new int[numOfElements + 1];
+    for (i = 0; i < 10; i++) // initializing bucket
+        bucket[i] = new int[numOfElements];
 
-    cout << "Initial buckets: " << endl;
-    printAllBuckets(buckets);
+    cout << "Enter array element : ";
+    for (i = 0; i < numOfElements; i++)
+        cin >> arr[i];
 
-    for (int i = 0; i < BUCKET_COUNT; ++i) // sort each bucket
-    {
-        buckets[i] = insertionSort(buckets[i]);
-    }
+    bucketSort(arr, bucket, numOfElements);
 
-    cout << "-------------" << endl
-         << "Sorted buckets: " << endl;
-    printAllBuckets(buckets);
-
-    setArrayFromBuckets(array, buckets);
-    return;
-}
-
-int main(void)
-{
-    int array[ARRAY_SIZE] = {13, 17, 29, 24, 22, 5, 11, 42, 8, 52, 37, 32, 35, 47, 49, 51, 56}; // initialize array
-
-    cout << "Initial array: " << endl;
-    print(array);
-    cout << "-------------" << endl;
-
-    BucketSort(array);
-    cout << "-------------" << endl;
-    cout << "Sorted array: " << endl;
-    print(array);
+    cin >> i; // to stop console from closing
+    return 0;
 }
