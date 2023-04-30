@@ -1,8 +1,8 @@
 #include <iostream>
 
-#define ARRAY_SIZE 17  // size of array to be sorted
-#define BUCKET_COUNT 6 // number of buckets to be used
-#define INTERVAL 10    // interval of values in each bucket
+#define ARRAY_SIZE 20   // size of array to be sorted
+#define BUCKET_COUNT 10 // number of buckets to be used
+#define INTERVAL 10     // interval of values in each bucket
 
 using namespace std;
 
@@ -119,7 +119,7 @@ void BucketSort(int array[])
 
 int main(void)
 {
-    int array[ARRAY_SIZE] = {13, 17, 29, 24, 22, 5, 11, 42, 8, 52, 37, 32, 35, 47, 49, 51, 56}; // initialize array
+    int array[ARRAY_SIZE] = {95, 65, 32, 45, 68, 15, 56, 25, 45, 74, 12, 98, 5, 9, 7, 2, 3, 8, 92, 73};
 
     cout << "Initial array: " << endl;
     print(array);
