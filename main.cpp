@@ -9,41 +9,41 @@ using namespace std;
 class Node // node for linked list (bucket)
 {
 public:
-    int value;  // value of node
-    Node *next; // pointer to next node
+    int value;
+    Node *next;
 };
 
-void print(int array[]) // print array of integers
+void print(int array[])
 {
     for (int i = 0; i < ARRAY_SIZE; ++i) // for each item in array
     {
-        cout << array[i] << " "; // print item
+        cout << array[i] << " ";
     }
-    cout << endl; // print new line
+    cout << endl;
 }
 
 void print(Node *node) // print linked list (bucket)
 {
-    while (node != NULL) // while not end of list
+    while (node != NULL)
     {
         cout << node->value << " "; // print value of current node
         node = node->next;          // move to next node
     }
-    cout << endl; // print new line
+    cout << endl;
 }
 
-void printAllBuckets(Node *buckets[]) // print all buckets
+void printAllBuckets(Node *buckets[])
 {
-    for (int i = 0; i < BUCKET_COUNT; ++i) // for each bucket
+    for (int i = 0; i < BUCKET_COUNT; ++i)
     {
-        cout << "Bucket " << i << ": "; // print bucket index
-        print(buckets[i]);              // print bucket
+        cout << "Bucket " << i << ": "; // bucket index
+        print(buckets[i]);
     }
 }
 
 void setArrayFromBuckets(int array[], Node *buckets[]) // for adding sorted items from buckets to the array
 {
-    int index = 0;                         // set index to 0
+    int index = 0;
     for (int i = 0; i < BUCKET_COUNT; ++i) // for each bucket
     {
         Node *current = buckets[i]; // set current node to first node in bucket
@@ -102,7 +102,7 @@ void BucketSort(int array[])
     }
 
     cout << "Initial buckets: " << endl;
-    printAllBuckets(buckets); // print all buckets
+    printAllBuckets(buckets);
 
     for (int i = 0; i < BUCKET_COUNT; ++i) // sort each bucket
     {
@@ -111,9 +111,9 @@ void BucketSort(int array[])
 
     cout << "-------------" << endl
          << "Sorted buckets: " << endl;
-    printAllBuckets(buckets); // print all buckets
+    printAllBuckets(buckets);
 
-    setArrayFromBuckets(array, buckets); // set array from buckets
+    setArrayFromBuckets(array, buckets);
     return;
 }
 
